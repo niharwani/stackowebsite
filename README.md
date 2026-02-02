@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stacko Studio
+
+A modern e-commerce website for custom collectible figurines, lamps, and keychains. Built with Next.js 16, React 19, and Supabase.
+
+## Features
+
+### Customer-Facing Store
+- **Homepage** - Hero carousel, featured products, category showcase
+- **Shop** - Product listing with search and category filters
+- **Product Details** - Full product information with add to cart
+- **Shopping Cart** - Persistent cart with quantity management
+- **About Page** - Brand story and information
+
+### Admin Dashboard
+- **Product Management** - Create, edit, delete products
+- **Category Management** - Organize products by categories
+- **Media Library** - Upload and manage product images
+- **WordPress-style UI** - Familiar dark sidebar navigation
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Database**: Supabase (PostgreSQL)
+- **Storage**: Supabase Storage
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Fonts**: Big Shoulders Display, Poppins
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/niharwani/stackowebsite.git
+cd stackowebsite
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create `.env.local` file:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Set up Supabase:
+   - Run `supabase-setup.sql` in Supabase SQL Editor to create tables and seed data
+   - Run `supabase-admin-setup.sql` for admin panel access
+   - Create a storage bucket named `product-images` (set to public)
 
-## Learn More
+5. Start the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+6. Open [http://localhost:3000](http://localhost:3000) for the store
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+7. Open [http://localhost:3000/admin](http://localhost:3000/admin) for admin panel
+   - Default password: `stacko2024`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+stacko-studio/
+├── app/
+│   ├── (main)/           # Main store pages (with header/footer)
+│   │   ├── page.tsx      # Homepage
+│   │   ├── about/        # About page
+│   │   ├── cart/         # Shopping cart
+│   │   ├── shop/         # Product listing
+│   │   └── product/      # Product details
+│   ├── admin/            # Admin dashboard (standalone)
+│   │   ├── page.tsx      # Dashboard
+│   │   ├── login/        # Admin login
+│   │   ├── products/     # Product management
+│   │   ├── categories/   # Category management
+│   │   └── media/        # Media library
+│   ├── layout.tsx        # Root layout
+│   └── globals.css       # Global styles
+├── components/
+│   ├── admin/            # Admin components
+│   ├── home/             # Homepage components
+│   ├── layout/           # Navbar, Footer, etc.
+│   ├── shop/             # Shop components
+│   └── ui/               # Reusable UI components
+├── context/
+│   ├── AdminContext.tsx  # Admin authentication
+│   └── CartContext.tsx   # Shopping cart state
+├── lib/
+│   ├── supabase.ts       # Supabase client & queries
+│   ├── supabase-admin.ts # Admin CRUD operations
+│   └── utils.ts          # Utility functions
+└── supabase-*.sql        # Database setup scripts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon/public key |
+
+## Available Scripts
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
+
+### Other Platforms
+
+Build the project and deploy the `.next` folder:
+```bash
+npm run build
+npm run start
+```
+
+## License
+
+MIT

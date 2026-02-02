@@ -1,26 +1,245 @@
 @import "tailwindcss";
 
 :root {
+  /* Funko-inspired color palette */
+  /* Primary - Black */
+  --primary: #000000;
+  --primary-dark: #000000;
+  --primary-light: #1a1a1a;
+
+  /* Secondary - White/Light */
+  --secondary: #ffffff;
+  --secondary-dark: #f5f5f5;
+  --secondary-light: #fafafa;
+
+  /* Accent Colors */
+  --accent: #000000;
+  --accent-muted: #666666;
+  --accent-light: #999999;
+
+  /* Brand Colors */
+  --funko-blue: #0066cc;
+  --funko-purple: #6b21a8;
+  --funko-pink: #ec4899;
+  --funko-yellow: #fbbf24;
+  --funko-red: #dc2626;
+  --funko-green: #16a34a;
+  --funko-orange: #ea580c;
+
+  /* Background */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --muted: #f5f5f5;
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-light: var(--secondary-light);
+  --color-accent: var(--accent);
+  --color-accent-muted: var(--accent-muted);
+  --color-accent-light: var(--accent-light);
+  --color-funko-blue: var(--funko-blue);
+  --color-funko-purple: var(--funko-purple);
+  --color-funko-pink: var(--funko-pink);
+  --color-funko-yellow: var(--funko-yellow);
+  --color-funko-red: var(--funko-red);
+  --color-funko-green: var(--funko-green);
+  --color-funko-orange: var(--funko-orange);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted);
+  --font-poppins: var(--font-poppins);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  min-height: 100vh;
+}
+
+/* Font utility classes */
+.font-poppins {
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+.font-display {
+  font-family: 'Big Shoulders Display', sans-serif;
+}
+
+/* Apply Big Shoulders to all main headings */
+h1, h2, h3 {
+  font-family: 'Big Shoulders Display', sans-serif;
+}
+
+/* Custom scrollbar - minimalist style */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Selection color */
+::selection {
+  background: var(--primary);
+  color: var(--secondary);
+}
+
+/* Funko-style gradient backgrounds */
+.gradient-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #0f172a 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%);
+}
+
+.gradient-funko {
+  background: linear-gradient(to right, #6b21a8, #0066cc);
+}
+
+/* Animation keyframes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(107, 33, 168, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(107, 33, 168, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Hover card effect like Funko */
+.funko-card {
+  transition: all 0.3s ease;
+}
+
+.funko-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Button hover effects */
+.btn-funko {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-funko::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-funko:hover::before {
+  left: 100%;
+}
+
+/* Banner styles */
+.promo-banner {
+  background: linear-gradient(90deg, #000000, #1a1a1a);
+}
+
+/* Navigation mega menu styles */
+.mega-menu {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Product image zoom effect */
+.product-image-zoom {
+  transition: transform 0.5s ease;
+}
+
+.product-image-zoom:hover {
+  transform: scale(1.1);
 }
