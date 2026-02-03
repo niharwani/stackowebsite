@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Package, FolderOpen, Image, Plus, ArrowRight } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { getProducts, getCategories, Product, Category } from '@/lib/supabase';
+import { getProductImage } from '@/lib/utils';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -142,9 +143,9 @@ export default function AdminDashboard() {
                         className="flex items-center gap-3"
                       >
                         <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                          {product.image_url ? (
+                          {getProductImage(product.image_url) ? (
                             <img
-                              src={product.image_url}
+                              src={getProductImage(product.image_url)!}
                               alt={product.name}
                               className="w-full h-full object-contain rounded"
                             />

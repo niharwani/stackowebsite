@@ -291,10 +291,7 @@ function FilterSidebarDynamic({
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <span className="flex items-center gap-2">
-                <span>{category.emoji}</span>
-                <span>{category.name}</span>
-              </span>
+              <span>{category.name}</span>
               <span className={`text-xs ${selectedCategory === category.slug ? 'text-white/70' : 'text-gray-400'}`}>
                 {category.product_count}
               </span>

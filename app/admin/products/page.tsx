@@ -17,6 +17,19 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { getProducts, getCategories, Product, Category } from '@/lib/supabase';
 import { deleteProduct } from '@/lib/supabase-admin';
 
+// Helper to get first image from stored format (JSON array or single URL)
+function getFirstImage(imageUrl: string | null): string | null {
+  if (!imageUrl) return null;
+  try {
+    const parsed = JSON.parse(imageUrl);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+  } catch {
+    // Not JSON, treat as single URL
+    if (imageUrl.startsWith('http')) return imageUrl;
+  }
+  return null;
+}
+
 function ProductsContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -208,9 +221,9 @@ function ProductsContent() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                          {product.image_url ? (
+                          {getFirstImage(product.image_url) ? (
                             <img
-                              src={product.image_url}
+                              src={getFirstImage(product.image_url)!}
                               alt={product.name}
                               className="w-full h-full object-contain"
                             />

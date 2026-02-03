@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, Heart, Package } from 'lucide-react';
 import { Product } from '@/lib/supabase';
 import { useCart } from '@/context/CartContext';
-import { formatPrice, calculateDiscount } from '@/lib/utils';
+import { formatPrice, calculateDiscount, getProductImage } from '@/lib/utils';
 import Badge from '@/components/ui/Badge';
 
 interface ProductCardProps {
@@ -55,9 +55,9 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* Image Container */}
           <div className="relative aspect-square p-6 flex items-center justify-center bg-gray-50 overflow-hidden">
-            {product.image_url ? (
+            {getProductImage(product.image_url) ? (
               <img
-                src={product.image_url}
+                src={getProductImage(product.image_url)!}
                 alt={product.name}
                 className="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500"
               />

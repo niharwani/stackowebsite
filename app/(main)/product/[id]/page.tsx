@@ -7,33 +7,29 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Star,
-  ShoppingCart,
   Heart,
   Share2,
   Truck,
   Shield,
   RotateCcw,
-  Minus,
-  Plus,
-  Check,
   Package,
   Frown,
+  MessageCircle,
 } from 'lucide-react';
 import { getProductById, getProductsByCategory, Product } from '@/lib/supabase';
-import { useCart } from '@/context/CartContext';
-import { formatPrice, calculateDiscount } from '@/lib/utils';
+import { formatPrice, calculateDiscount, getProductImage, parseProductImages } from '@/lib/utils';
 import Badge from '@/components/ui/Badge';
 import ProductCard from '@/components/shop/ProductCard';
+
+const WHATSAPP_NUMBER = '919987744781';
 
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
-  const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [isAdded, setIsAdded] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     async function loadProduct() {
@@ -50,19 +46,11 @@ export default function ProductPage() {
     loadProduct();
   }, [params.id]);
 
-  const handleAddToCart = () => {
+  const handleWhatsAppOrder = () => {
     if (!product) return;
-    addToCart(product, quantity);
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
-
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
-
-  const increaseQuantity = () => {
-    setQuantity(quantity + 1);
+    const message = `Hi! I'm interested in buying *${product.name}* (Rs. ${product.price}). Please let me know the availability and next steps.`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   if (loading) {
@@ -127,34 +115,67 @@ export default function ProductPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         {/* Product Details */}
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
-          {/* Product Image */}
+          {/* Product Images */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="relative"
           >
-            <div className="aspect-square bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden flex items-center justify-center">
-              {/* Badges */}
-              <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                {product.is_new && <Badge variant="new">New</Badge>}
-                {product.original_price && (
-                  <Badge variant="sale">
-                    -{calculateDiscount(product.original_price, product.price)}%
-                  </Badge>
-                )}
-              </div>
+            {(() => {
+              const images = parseProductImages(product.image_url);
+              const currentImage = images[selectedImageIndex] || null;
 
-              {/* Product Image */}
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-contain p-8"
-                />
-              ) : (
-                <Package className="w-32 h-32 text-gray-400" />
-              )}
-            </div>
+              return (
+                <>
+                  {/* Main Image */}
+                  <div className="aspect-square bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden flex items-center justify-center relative">
+                    {/* Badges */}
+                    <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                      {product.is_new && <Badge variant="new">New</Badge>}
+                      {product.original_price && (
+                        <Badge variant="sale">
+                          -{calculateDiscount(product.original_price, product.price)}%
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Product Image */}
+                    {currentImage ? (
+                      <img
+                        src={currentImage}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-8"
+                      />
+                    ) : (
+                      <Package className="w-32 h-32 text-gray-400" />
+                    )}
+                  </div>
+
+                  {/* Image Thumbnails */}
+                  {images.length > 1 && (
+                    <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                      {images.map((img, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`shrink-0 w-20 h-20 rounded-lg border-2 overflow-hidden transition-all ${
+                            index === selectedImageIndex
+                              ? 'border-black'
+                              : 'border-gray-200 hover:border-gray-400'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} ${index + 1}`}
+                            className="w-full h-full object-contain bg-gray-50 p-1"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </motion.div>
 
           {/* Product Info */}
@@ -220,51 +241,14 @@ export default function ProductPage() {
               </span>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center gap-4 mb-8">
-              <span className="text-gray-600 font-medium">Quantity:</span>
-              <div className="flex items-center bg-gray-100 rounded-lg border border-gray-200">
-                <button
-                  onClick={decreaseQuantity}
-                  disabled={quantity <= 1}
-                  className="p-3 text-gray-600 hover:text-gray-900 disabled:opacity-50 transition-colors"
-                >
-                  <Minus className="w-5 h-5" />
-                </button>
-                <span className="w-12 text-center text-gray-900 font-bold">
-                  {quantity}
-                </span>
-                <button
-                  onClick={increaseQuantity}
-                  className="p-3 text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
-                onClick={handleAddToCart}
-                disabled={!product.in_stock}
-                className={`flex-1 py-4 px-8 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed ${
-                  isAdded
-                    ? 'bg-green-600 text-white'
-                    : 'bg-black text-white hover:bg-gray-800'
-                }`}
+                onClick={handleWhatsAppOrder}
+                className="flex-1 py-4 px-8 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 bg-green-500 text-white hover:bg-green-600"
               >
-                {isAdded ? (
-                  <>
-                    <Check className="w-5 h-5" />
-                    Added to Cart
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
-                  </>
-                )}
+                <MessageCircle className="w-5 h-5" />
+                Order on WhatsApp
               </button>
               <button className="p-4 border-2 border-gray-300 rounded-lg text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
                 <Heart className="w-5 h-5" />

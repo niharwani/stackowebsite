@@ -18,7 +18,7 @@ import {
   Package,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getProductImage } from '@/lib/utils';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice, totalItems } = useCart();
@@ -95,7 +95,7 @@ export default function CartPage() {
               {items.map((item, index) => {
                 // Handle both Supabase format (snake_case) and legacy format (camelCase)
                 const product = item.product;
-                const imageUrl = 'image_url' in product ? product.image_url : null;
+                const imageUrl = 'image_url' in product ? getProductImage(product.image_url) : null;
 
                 return (
                   <motion.div
