@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, User, Users, Lightbulb, Key, Truck, Palette, Gift, MessageCircle } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Truck, Palette, Gift, MessageCircle } from 'lucide-react';
 
 const heroSlides = [
   {
@@ -15,7 +16,7 @@ const heroSlides = [
     href: "/shop?category=figurines",
     gradient: "from-purple-900 via-purple-800 to-indigo-900",
     accent: "bg-purple-500",
-    icon: User,
+    image: "/Hero/mini'me.png",
   },
   {
     id: 2,
@@ -26,7 +27,7 @@ const heroSlides = [
     href: "/shop?category=figurines",
     gradient: "from-pink-600 via-red-600 to-rose-700",
     accent: "bg-pink-500",
-    icon: Users,
+    image: "/Hero/mini'me.png",
   },
   {
     id: 3,
@@ -37,7 +38,7 @@ const heroSlides = [
     href: "/shop?category=lamps",
     gradient: "from-yellow-600 via-orange-500 to-amber-600",
     accent: "bg-yellow-500",
-    icon: Lightbulb,
+    image: "/Hero/lamp.png",
   },
   {
     id: 4,
@@ -48,7 +49,7 @@ const heroSlides = [
     href: "/shop?category=accessories",
     gradient: "from-blue-900 via-blue-800 to-cyan-900",
     accent: "bg-blue-500",
-    icon: Key,
+    image: "/Hero/keychain.png",
   },
 ];
 
@@ -170,7 +171,7 @@ export default function Hero() {
                   className="hidden lg:flex items-center justify-center"
                 >
                   <div className="relative">
-                    {/* Floating Icon */}
+                    {/* Floating Product Image */}
                     <motion.div
                       animate={{
                         y: [0, -15, 0],
@@ -182,10 +183,14 @@ export default function Hero() {
                       }}
                       className="filter drop-shadow-2xl"
                     >
-                      {(() => {
-                        const IconComponent = heroSlides[currentSlide].icon;
-                        return <IconComponent className="w-48 h-48 text-white/90" strokeWidth={1.5} />;
-                      })()}
+                      <Image
+                        src={heroSlides[currentSlide].image}
+                        alt={heroSlides[currentSlide].title}
+                        width={400}
+                        height={400}
+                        className="w-80 h-80 object-contain"
+                        priority
+                      />
                     </motion.div>
 
                     {/* Glow Effect */}
