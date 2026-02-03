@@ -235,21 +235,19 @@ export default function Hero() {
         </AnimatePresence>
       </div>
 
-      {/* Feature Cards Below Hero */}
-      <div className="bg-white py-8 border-b border-gray-100">
+      {/* Feature Banner Below Hero */}
+      <div className="bg-yellow-400 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {featureItems.map((feature, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 p-4 rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-4 justify-center"
               >
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <feature.icon className="w-6 h-6 text-gray-700" />
-                </div>
+                <feature.icon className="w-8 h-8 text-black" strokeWidth={2.5} />
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{feature.title}</h3>
-                  <p className="text-gray-500 text-xs">{feature.desc}</p>
+                  <h3 className="font-black text-black text-lg uppercase tracking-wide">{feature.title}</h3>
+                  <p className="text-black/70 text-sm font-semibold">{feature.desc}</p>
                 </div>
               </div>
             ))}
