@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   Video,
   Loader2,
+  Plus,
 } from 'lucide-react';
 import { Product, Category, getCategories } from '@/lib/supabase';
 import { createProduct, updateProduct, uploadFile, ProductInput } from '@/lib/supabase-admin';
@@ -19,21 +20,44 @@ interface ProductFormProps {
   isEditing?: boolean;
 }
 
+// Helper to parse images from stored format
+function parseImages(imageUrl: string | null): string[] {
+  if (!imageUrl) return [];
+  try {
+    // Try parsing as JSON array
+    const parsed = JSON.parse(imageUrl);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // If not JSON, treat as single URL
+    if (imageUrl.startsWith('http')) return [imageUrl];
+  }
+  return [];
+}
+
+// Helper to serialize images for storage
+function serializeImages(images: string[]): string | null {
+  if (images.length === 0) return null;
+  if (images.length === 1) return images[0]; // Single image as plain URL for backwards compatibility
+  return JSON.stringify(images);
+}
+
 export default function ProductForm({ product, isEditing = false }: ProductFormProps) {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [error, setError] = useState('');
 
+  // Multiple images state
+  const [images, setImages] = useState<string[]>(() => parseImages(product?.image_url || null));
+
   // Form state
-  const [formData, setFormData] = useState<ProductInput>({
+  const [formData, setFormData] = useState<Omit<ProductInput, 'image_url'>>({
     name: product?.name || '',
     description: product?.description || '',
     price: product?.price || 0,
     original_price: product?.original_price || null,
     category: product?.category || '',
-    image_url: product?.image_url || null,
     video_url: product?.video_url || null,
     in_stock: product?.in_stock ?? true,
     is_new: product?.is_new ?? false,
@@ -72,37 +96,46 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
-      return;
-    }
-
-    setIsUploading(true);
     setError('');
 
-    try {
-      const url = await uploadFile(file, 'product-images');
-      setFormData((prev) => ({ ...prev, image_url: url }));
-    } catch (err) {
-      setError('Failed to upload image. Make sure Supabase storage is configured.');
-      console.error(err);
-    } finally {
-      setIsUploading(false);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload only image files');
+        continue;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Each image should be less than 5MB');
+        continue;
+      }
+
+      setUploadingIndex(images.length + i);
+
+      try {
+        const url = await uploadFile(file, 'product-images');
+        if (url) {
+          setImages((prev) => [...prev, url]);
+        }
+      } catch (err) {
+        setError('Failed to upload image. Make sure Supabase storage is configured.');
+        console.error(err);
+      }
     }
+
+    setUploadingIndex(null);
+    // Reset the input
+    e.target.value = '';
   };
 
-  const handleRemoveImage = () => {
-    setFormData((prev) => ({ ...prev, image_url: null }));
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,10 +159,15 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
     setIsSubmitting(true);
 
     try {
+      const productData: ProductInput = {
+        ...formData,
+        image_url: serializeImages(images),
+      };
+
       if (isEditing && product) {
-        await updateProduct(product.id, formData);
+        await updateProduct(product.id, productData);
       } else {
-        await createProduct(formData);
+        await createProduct(productData);
       }
       router.push('/admin/products');
     } catch (err: any) {
@@ -200,50 +238,62 @@ export default function ProductForm({ product, isEditing = false }: ProductFormP
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Media</h2>
 
-            {/* Image Upload */}
+            {/* Multiple Image Upload */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Image
+                Product Images
               </label>
+              <p className="text-xs text-gray-500 mb-3">
+                Upload multiple images. The first image will be the main product image.
+              </p>
 
-              {formData.image_url ? (
-                <div className="relative w-full max-w-xs">
-                  <img
-                    src={formData.image_url}
-                    alt="Product"
-                    className="w-full aspect-square object-contain border border-gray-200 rounded-lg bg-gray-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full max-w-xs aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#0073aa] transition-colors bg-gray-50">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {/* Existing Images */}
+                {images.map((url, index) => (
+                  <div key={index} className="relative aspect-square group">
+                    <img
+                      src={url}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-contain border border-gray-200 rounded-lg bg-gray-50"
+                    />
+                    {index === 0 && (
+                      <span className="absolute top-1 left-1 px-2 py-0.5 bg-[#0073aa] text-white text-xs font-medium rounded">
+                        Main
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Upload Button */}
+                <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#0073aa] transition-colors bg-gray-50">
                   <input
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageUpload}
                     className="hidden"
-                    disabled={isUploading}
+                    disabled={uploadingIndex !== null}
                   />
-                  {isUploading ? (
+                  {uploadingIndex !== null ? (
                     <div className="flex flex-col items-center gap-2 text-gray-500">
                       <Loader2 className="w-8 h-8 animate-spin" />
-                      <span className="text-sm">Uploading...</span>
+                      <span className="text-xs">Uploading...</span>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-gray-500">
-                      <ImageIcon className="w-8 h-8" />
-                      <span className="text-sm">Click to upload image</span>
-                      <span className="text-xs">PNG, JPG up to 5MB</span>
+                      <Plus className="w-8 h-8" />
+                      <span className="text-xs text-center px-2">Add Images</span>
                     </div>
                   )}
                 </label>
-              )}
+              </div>
             </div>
 
             {/* Video URL */}
