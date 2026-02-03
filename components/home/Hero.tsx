@@ -186,9 +186,9 @@ export default function Hero() {
                       <Image
                         src={heroSlides[currentSlide].image}
                         alt={heroSlides[currentSlide].title}
-                        width={400}
-                        height={400}
-                        className="w-80 h-80 object-contain"
+                        width={800}
+                        height={800}
+                        className="w-[640px] h-[640px] object-contain"
                         priority
                       />
                     </motion.div>
